@@ -17,8 +17,8 @@ SERVICES=(
 # Enable dan start semua service
 echo "Mengaktifkan dan menjalankan semua service..."
 for SERVICE in "${SERVICES[@]}"; do
-#    echo "Enabling $SERVICE..."
-#    sudo systemctl enable "$SERVICE"
+    echo "Enabling $SERVICE..."
+    sudo systemctl enable "$SERVICE"
 
     echo "Starting $SERVICE..."
     sudo systemctl start "$SERVICE"
