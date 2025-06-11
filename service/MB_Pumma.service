@@ -3,7 +3,7 @@ Description=Autostart Program Pumma_Mb
 After=multi-user.target
 [Service]
 Environment="PATH=/home/pi/code/envPumma/bin:/usr/bin:/bin"
-ExecStart=/home/pi/code/envPumma/bin/python3 /home/pi/code/Pumma_Mb
+ExecStart=/home/pi/code/envPumma/bin/python3 /home/pi/code/Pumma_Mb/main.py
 WorkingDirectory=/home/pi/code
 Restart=always
 User=pi
