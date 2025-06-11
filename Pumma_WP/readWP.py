@@ -6,13 +6,7 @@ import os
 import psutil
 import threading
 from datetime import datetime
-<<<<<<< HEAD:Pumma_WP/readWP.py
 import fcntl  # Untuk locking file
-=======
-import fcntl
-import inspect
-import sys
->>>>>>> fe9bd9d (add kalman filter before STF LTF):Pumma1/readWP.py
 
 # ✅ Blokir jika dijalankan langsung
 if __name__ == "__main__":
@@ -64,11 +58,7 @@ def log_data(water_level_pressure):
     try:
         now = datetime.now()
         if _last_log_time and (now - _last_log_time).total_seconds() < 1:
-<<<<<<< HEAD:Pumma_WP/readWP.py
             return  # Hindari duplikasi akibat pemanggilan berdekatan
-=======
-            return
->>>>>>> fe9bd9d (add kalman filter before STF LTF):Pumma1/readWP.py
         _last_log_time = now
 
         filepath = get_log_filename()
@@ -116,10 +106,7 @@ def read_modbus_data(instrument):
 
                 log_data(water_level_pressure)
                 raw_data(MPa, kPa, water_level_pressure, bar, mbar, kg_cm2, psi, mH2O, mmH2O, celcius)
-<<<<<<< HEAD:Pumma_WP/readWP.py
                 print(f"Water_Level_Pressure: {water_level_pressure}")
-=======
->>>>>>> fe9bd9d (add kalman filter before STF LTF):Pumma1/readWP.py
                 return MPa, kPa, Pa, water_level_pressure, bar, mbar, kg_cm2, psi, mH2O, mmH2O, celcius
             else:
                 print("Response data is incomplete.")
@@ -132,11 +119,8 @@ def get_sensor_data():
     instrument = None
     try:
         instrument = create_instrument()
-<<<<<<< HEAD:Pumma_WP/readWP.py
         print("Reading Modbus RTU data...")
 
-=======
->>>>>>> fe9bd9d (add kalman filter before STF LTF):Pumma1/readWP.py
         for _ in range(3):
             water_level_pressure = read_modbus_data(instrument)
             if water_level_pressure is not None:
@@ -149,7 +133,6 @@ def get_sensor_data():
     finally:
         if instrument and instrument.serial.is_open:
             instrument.serial.close()
-<<<<<<< HEAD:Pumma_WP/readWP.py
             print("Serial port closed.")
 
 # Hindari menjalankan loop saat di-import
@@ -164,5 +147,3 @@ if __name__ == "__main__":
             time.sleep(1)
 
 
-=======
->>>>>>> fe9bd9d (add kalman filter before STF LTF):Pumma1/readWP.py
