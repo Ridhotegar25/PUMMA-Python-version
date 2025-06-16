@@ -106,10 +106,10 @@ def main_loop():
 
             # Send alert if necessary
             if alert_level > 0:
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                #timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 message = (
                     f"⚠️ PUMMA ** ⚠️ \n" #Ganti dengan Nama yang sesuai 
-                    f"Timestamp: {timestamp}\n"
+                    f"Timestamp: {payload['timestamp']}\n"
                     f"Water Level: {payload['Maxbotic']}\n"
                     f"Alert Signal: {payload['Alert_Signal']}\n"
                     f"RMS: {payload['rms']}\n"
