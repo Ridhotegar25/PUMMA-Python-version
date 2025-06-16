@@ -108,7 +108,7 @@ def main_loop():
             if alert_level > 0:
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 message = (
-                    f"⚠️ PUMMA SEBESI ⚠️ \n" #Ganti dengan Nama yang sesuai 
+                    f"⚠️ PUMMA ** ⚠️ \n" #Ganti dengan Nama yang sesuai 
                     f"Timestamp: {timestamp}\n"
                     f"Water Level: {payload['Maxbotic']}\n"
                     f"Alert Signal: {payload['Alert_Signal']}\n"
