@@ -124,7 +124,7 @@ def process_alert_log():
         return 0.0, 0.0, 0
 
     rms_alert_signal = calculate_rms(alert_data)
-    threshold = round(rms_alert_signal * 2 + 0.1, 3)
+    threshold = round(rms_alert_signal * 4 + 0.1, 3)
 
     # Perhitungan alert level sesuai logika awal
     alert_level = 0

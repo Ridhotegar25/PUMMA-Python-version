@@ -146,10 +146,8 @@ def data_processor(queue):
 
         except Exception as e:
             print(f"Error in data processing: {e}")
-
-        elapsed_time = time.time() - start_time
-        sleep_time = max(0, 1 - elapsed_time)
-        time.sleep(sleep_time)
+            
+        time.sleep(1)
 
 def main():
     queue = multiprocessing.Queue()

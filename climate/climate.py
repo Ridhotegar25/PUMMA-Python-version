@@ -356,12 +356,7 @@ def main():
             else:
                 print("MQTT connection lost - Data not sent")
 
-            # Calculate sleep time to maintain 1-second interval
-            sleep_time = next_reading_time - time.time()
-            if sleep_time > 0:
-                time.sleep(sleep_time)
-            else:
-                next_reading_time = time.time() + 1.0
+            sleep.time(1)
 
         except Exception as e:
             print(f"Critical error in main loop: {e}")
