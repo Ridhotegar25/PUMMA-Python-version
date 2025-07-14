@@ -18,11 +18,11 @@ sensor.serial.stopbits = 1  # Stop bit
 sensor.serial.timeout = 10  # Timeout komunikasi
 
 # Konfigurasi MQTT
-MQTT_BROKER = "vps.isi-net.org"
+MQTT_BROKER = ""
 MQTT_PORT = 1883
-MQTT_TOPIC = "Pumma/Sebesi_Device"
-MQTT_USERNAME = "unila"
-MQTT_PASSWORD = "pwdMQTT@123"
+MQTT_TOPIC = ""
+MQTT_USERNAME = ""
+MQTT_PASSWORD = ""
 
 # Inisialisasi MQTT client
 mqtt_client = mqtt.Client()
