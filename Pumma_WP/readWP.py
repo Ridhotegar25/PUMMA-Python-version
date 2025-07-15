@@ -8,21 +8,7 @@ import threading
 from datetime import datetime
 import fcntl  # Untuk locking file
 
-# ✅ Blokir jika dijalankan langsung
-if __name__ == "__main__":
-    print("❌ ERROR: Script ini tidak boleh dijalankan langsung.")
-    print("✅ Gunakan hanya melalui pemanggilan oleh main.py")
-    sys.exit(1)
-
-# ✅ Blokir jika di-import oleh file selain main.py
-caller_frame = inspect.stack()[1]
-caller_filename = caller_frame.filename
-
-if not caller_filename.endswith("main.py"):
-    print(f"❌ ERROR: readWP.py hanya boleh dipanggil dari main.py, bukan dari {caller_filename}")
-    sys.exit(1)
-
-# --- Kode fungsi dimulai dari sini ---
+# Lock untuk menghindari konflik antar proses yang mengakses port serial
 serial_lock = threading.Lock()
 
 def create_instrument():
@@ -145,5 +131,3 @@ if __name__ == "__main__":
             time.sleep(1.5)
         else:
             time.sleep(1)
-
-

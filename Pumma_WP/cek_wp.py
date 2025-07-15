@@ -6,29 +6,31 @@ import os
 import psutil
 import threading
 from datetime import datetime
-import fcntl  # Untuk locking file
 
 # Lock untuk menghindari konflik antar proses yang mengakses port serial
 serial_lock = threading.Lock()
 
+# Konfigurasi port serial dan perangkat
 def create_instrument():
-    instrument = minimalmodbus.Instrument('/dev/Water_Press', 1)
+    instrument = minimalmodbus.Instrument('/dev/Water_Press', 1)  # Port serial dan Unit ID
     instrument.serial.baudrate = 9600
     instrument.serial.bytesize = 8
     instrument.serial.parity = minimalmodbus.serial.PARITY_NONE
     instrument.serial.stopbits = 1
-    instrument.serial.timeout = 1
+    instrument.serial.timeout = 1  # Timeout dalam detik
     instrument.mode = minimalmodbus.MODE_RTU
     return instrument
 
-ADDRESS = 2
-NUM_REGISTERS = 10
+# Parameter komunikasi
+ADDRESS = 2  # Alamat register pertama
+NUM_REGISTERS = 10  # Jumlah register yang akan dibaca
 
+# Path untuk menyimpan log
 LOG_DIR = "/home/pi/Data/LogSeaWater"
 LOG_RAW = "/home/pi/Data/Raw_WP"
-os.makedirs(LOG_DIR, exist_ok=True)
-os.makedirs(LOG_RAW, exist_ok=True)
+os.makedirs(LOG_DIR, exist_ok=True)  # Pastikan folder log ada
 
+# Fungsi untuk mendapatkan nama file log berdasarkan tanggal saat ini
 def get_log_filename():
     date_str = datetime.now().strftime("%d-%m-%Y")
     return os.path.join(LOG_DIR, f"Log_WP {date_str}.txt")
@@ -37,48 +39,37 @@ def get_log_filename1():
     date_str = datetime.now().strftime("%d-%m-%Y")
     return os.path.join(LOG_RAW, f"Raw_WP {date_str}.txt")
 
-_last_log_time = None
-
+# Fungsi untuk mencatat data ke file log
 def log_data(water_level_pressure):
-    global _last_log_time
     try:
-        now = datetime.now()
-        if _last_log_time and (now - _last_log_time).total_seconds() < 1:
-            return  # Hindari duplikasi akibat pemanggilan berdekatan
-        _last_log_time = now
-
-        filepath = get_log_filename()
-        with open(filepath, "a") as log_file:
-            fcntl.flock(log_file, fcntl.LOCK_EX)
-            timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-            log_file.write(f"{timestamp}, {water_level_pressure}\n")
-            fcntl.flock(log_file, fcntl.LOCK_UN)
-    except Exception as e:
-        print(f"Error writing to log file: {e}")
-
-def raw_data(MPa, kPa, water_level_pressure, bar, mbar, kg_cm2, psi, mH2O, mmH2O, celcius):
-    try:
-        filepath = get_log_filename1()
-        with open(filepath, "a") as log_file:
-            fcntl.flock(log_file, fcntl.LOCK_EX)
+        with open(get_log_filename(), "a") as log_file:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            log_file.write(f"{timestamp},{MPa},{kPa},{water_level_pressure},{bar},{mbar},{kg_cm2},{psi},{mH2O},{mmH2O},{celcius}\n")
-            fcntl.flock(log_file, fcntl.LOCK_UN)
+            log_file.write(f"{timestamp}, {water_level_pressure}\n")
     except Exception as e:
         print(f"Error writing to log file: {e}")
 
+def raw_data(MPa,kPa,water_level_pressure,bar,mbar,kg_cm2,psi,mH2O,mmH2O,celcius):
+    try:
+        with open(get_log_filename1(), "a") as log_file:
+            timestamp1 = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            log_file.write(f"{timestamp1}{MPa},{kPa},{water_level_pressure},{bar},{mbar},{kg_cm2},{psi},{mH2O},{mmH2O},{celcius}\n")
+    except Exception as e:
+        print(f"Error writing to log file: {e}")
+
+# Fungsi untuk membaca data Modbus
 def read_modbus_data(instrument):
     try:
-        with serial_lock:
+        with serial_lock:  # Gunakan lock agar tidak ada proses lain yang mengakses port secara bersamaan
             instrument.serial.reset_input_buffer()
             instrument.serial.reset_output_buffer()
-
+            
             response = instrument.read_registers(ADDRESS, NUM_REGISTERS, functioncode=3)
+            
             if len(response) >= 9:
                 MPa = response[0]
                 kPa = response[1]
                 Pa = response[2]
-                water_level_pressure = Pa / 100
+                water_level_pressure = Pa /100 
                 bar = response[3]
                 mbar = response[4]
                 kg_cm2 = response[5]
@@ -87,13 +78,15 @@ def read_modbus_data(instrument):
                 mmH2O = response[8]
                 celcius = response[9]
 
+                # Jika nilai terbaca lebih dari 65000, set ke 0
                 if response[2] > 65000:
                     water_level_pressure = 0
-
-                log_data(water_level_pressure)
-                raw_data(MPa, kPa, water_level_pressure, bar, mbar, kg_cm2, psi, mH2O, mmH2O, celcius)
+                
+                log_data(water_level_pressure)  # Simpan ke file log
+                raw_data(MPa,kPa,water_level_pressure,bar,mbar,kg_cm2,psi,mH2O,mmH2O,celcius)
                 print(f"Water_Level_Pressure: {water_level_pressure}")
-                return MPa, kPa, Pa, water_level_pressure, bar, mbar, kg_cm2, psi, mH2O, mmH2O, celcius
+                print(f"Data WP: {MPa},{kPa},{water_level_pressure},{bar},{mbar},{kg_cm2},{psi},{mH2O},{mmH2O},{celcius}")
+                return MPa,kPa,Pa,water_level_pressure,bar,mbar,kg_cm2,psi,mH2O,mmH2O,celcius  # Return nilai untuk digunakan di main.py
             else:
                 print("Response data is incomplete.")
                 return None
@@ -101,33 +94,34 @@ def read_modbus_data(instrument):
         print(f"Error reading Modbus data: {e}")
         return None
 
+# Fungsi untuk membaca data sensor
 def get_sensor_data():
     instrument = None
     try:
         instrument = create_instrument()
         print("Reading Modbus RTU data...")
 
-        for _ in range(3):
+        for _ in range(3):  # Coba membaca hingga 3 kali jika gagal
             water_level_pressure = read_modbus_data(instrument)
             if water_level_pressure is not None:
                 return water_level_pressure
-            time.sleep(1)
-        return None
+            time.sleep(1)  # Tunggu sebelum mencoba lagi
+        
+        return None  # Jika masih gagal setelah 3 kali percobaan
     except Exception as e:
         print(f"Error in get_sensor_data: {e}")
         return None
     finally:
         if instrument and instrument.serial.is_open:
-            instrument.serial.close()
+            instrument.serial.close()  # Tutup port serial dengan benar
             print("Serial port closed.")
 
-# Hindari menjalankan loop saat di-import
 if __name__ == "__main__":
-    print("readWP.py dijalankan langsung — tidak disarankan jika dipakai oleh main.py.")
     while True:
-        data = get_sensor_data()
-        if data is None:
+        water_level_pressure = get_sensor_data()
+        
+        if water_level_pressure is None:
             print("Data reading failed, retrying...")
-            time.sleep(1.5)
+            time.sleep(1.5)  # Tunggu lebih lama jika terjadi kegagalan
         else:
-            time.sleep(1)
+            time.sleep(1)  # Interval pembacaan data sensor yang stabil
